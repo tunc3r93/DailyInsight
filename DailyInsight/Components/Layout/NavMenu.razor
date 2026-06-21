@@ -1,30 +1,84 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">DailyInsight</a>
+@using DailyInsight.Models
+@implements IDisposable
+
+<div class="nav-wrapper @(_isExpanded ? "expanded" : "collapsed")">
+    <div class="nav-header">
+        <div class="logo-container">
+            <span class="logo-placeholder">✕</span>
+        </div>
+    </div>
+
+    <nav class="nav-mini">
+        @foreach (var item in _navItems)
+        {
+            <button class="nav-icon-btn @(_selectedItem == item.Id ? "active" : "")"
+                    @onclick="() => SelectItem(item.Id)"
+                    title="@item.Label">
+                <i class="@item.IconClass">@item.IconName</i>
+                <span class="tooltip">@item.Label</span>
+            </button>
+        }
+    </nav>
+
+    <div class="nav-expanded-panel">
+        <div class="panel-header">
+            <h3 class="panel-title">@GetSelectedLabel()</h3>
+            <button class="close-btn" @onclick="ClosePanel">✕</button>
+        </div>
+
+        <div class="panel-content">
+            @switch (_selectedItem)
+            {
+                case 1:
+                    <NavLink class="sub-link" href="">Home</NavLink>
+                    break;
+                case 2:
+                    <NavLink class="sub-link" href="counter">Counter</NavLink>
+                    break;
+                case 3:
+                    <NavLink class="sub-link" href="weather">Weather</NavLink>
+                    break;
+                case 4:
+                    <NavLink class="sub-link" href="myList">Projects</NavLink>
+                    break;
+                case 5:
+                    <NavLink class="sub-link" href="settings">Settings</NavLink>
+                    break;
+            }
+        </div>
     </div>
 </div>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+@code {
+    private bool _isExpanded;
+    private int _selectedItem = 1;
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
+    private readonly List<NavItem> _navItems =
+    [
+        new NavItem { Id = 1, Label = "Home", IconName = "home", IconClass = "material-icons" },
+        new NavItem { Id = 2, Label = "Analytics", IconName = "analytics", IconClass = "material-icons" },
+        new NavItem { Id = 3, Label = "Reports", IconName = "description", IconClass = "material-icons" },
+        new NavItem { Id = 4, Label = "Projects", IconName = "folder_special", IconClass = "material-icons" },
+        new NavItem { Id = 5, Label = "Settings", IconName = "settings", IconClass = "material-icons" }
+    ];
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
+    private void SelectItem(int itemId)
+    {
+        _selectedItem = itemId;
+        _isExpanded = true;
+        StateHasChanged();
+    }
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
-    </nav>
-</div>
+    private void ClosePanel()
+    {
+        _isExpanded = false;
+        StateHasChanged();
+    }
 
+    private string GetSelectedLabel()
+    {
+        return _navItems.FirstOrDefault(x => x.Id == _selectedItem)?.Label ?? "Menu";
+    }
+
+    public void Dispose() { }
+}
